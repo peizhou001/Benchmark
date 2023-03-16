@@ -78,7 +78,7 @@ def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, ep
     model = DistributedDataParallel(model, device_ids=[rank])
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.BCEWithLogitsLoss()
-    s = time.time()
+    s = time.perf_counter()
     for epoch in range(epoch_num):
         model.train()
         train_sampler.set_epoch(epoch)
@@ -90,7 +90,7 @@ def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, ep
             loss.backward()
             optimizer.step()
     if rank == 0:
-        print(f"elpased time: {(time.time() - s) / float(epoch_num)} for {world_size} gpus for each epoch ")
+        print(f"elpased time: {(time.perf_counter() - s) / float(epoch_num)} for {world_size} gpus for each epoch ")
     dist.barrier()
 
     dist.destroy_process_group()

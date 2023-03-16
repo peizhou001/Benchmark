@@ -2,6 +2,7 @@ import argparse
 import os
 import time
 
+import dgl
 from dgl.nn import AvgPooling, GINEConv
 
 import torch
@@ -75,6 +76,7 @@ def evaluate(dataloader, device, model, evaluator):
     return evaluator.eval(input_dict)
 
 def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, epoch_num: int):
+    dgl.utils.set_num_threads(11)
     os.environ['MASTER_ADDR'] = 'localhost'
     os.environ['MASTER_PORT'] = '12347'
     dist.init_process_group('nccl', rank=rank, world_size=world_size)
@@ -91,7 +93,8 @@ def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, ep
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.BCEWithLogitsLoss()
 
-    s = time.time()
+    print("start!")
+    s = time.perf_counter()
     for epoch in range(epoch_num):
         count = 0
         model.train()
@@ -105,7 +108,7 @@ def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, ep
             loss.backward()
             optimizer.step()
     if rank == 0:
-        print(f"elpased time: {(time.time() - s) / float(epoch_num)} for {world_size} gpus for each epoch ")
+        print(f"elpased time: {(time.perf_counter() - s) / float(epoch_num)} for {world_size} gpus for each epoch ")
 
     dist.barrier()
     dist.destroy_process_group()
