@@ -22,11 +22,7 @@ def parse_args():
         default="ogbg-molhiv",
         choices=["ogbg-molhiv", "ogbg-molpcba"]
     )
-    parser.add_argument(
-        "--world_size",
-        type=int,
-        default=1
-    )
+    
     parser.add_argument(
         "--batch_size",
         type=int,
@@ -35,7 +31,7 @@ def parse_args():
     parser.add_argument(
         "--epoch",
         type=int,
-        default=2
+        default=10
     ) 
     return parser.parse_args()
 
@@ -50,7 +46,7 @@ def run(cmd):
 
 if __name__ == '__main__':
     args = parse_args()
-    cmd = f"python  {args.backend}_distributed.py --batch_size {args.batch_size} --dataset {args.dataset} --epoch {args.epoch}"
+    base_cmd = f"python  {args.backend}_distributed.py --batch_size {args.batch_size} --dataset {args.dataset} --epoch {args.epoch}"
     for world_size in [1, 2, 4, 8]:
-        cmd += f" --world_size {world_size}"
+        cmd = base_cmd + f" --world_size {world_size}"
         run(cmd)

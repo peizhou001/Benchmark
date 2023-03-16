@@ -79,35 +79,16 @@ def run(rank, world_size: int, dataset_name: str, root: str, batch_size: int, ep
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
     criterion = torch.nn.BCEWithLogitsLoss()
     s = time.time()
-    to_time = 0.
-    fw_time = 0.
-    bw_time = 0.
-    optim_time = 0.
     for epoch in range(epoch_num):
         model.train()
         train_sampler.set_epoch(epoch)
         for data in train_loader:
-            se = time.time()
             data = data.to(rank)
-            to_time += (time.time() - se)
-            
-            se = time.time()
             optimizer.zero_grad()
             logits = model(data.x, data.adj_t, data.batch)
             loss = criterion(logits, data.y.to(torch.float))
-            fw_time += (time.time() - se)
-            
-            se = time.time()
             loss.backward()
-            bw_time += (time.time() - se)
-            se = time.time()
             optimizer.step()
-            optim_time += (time.time() - se)
-    print(f"{rank} to_time: {to_time / float(epoch_num)}")
-    print(f"{rank} fw_time: {fw_time / float(epoch_num)} ")
-    print(f"{rank} bw_time: {bw_time / float(epoch_num)}")
-    print(f"{rank} optim_time: {optim_time / float(epoch_num)}")
-    print(f"-------")
     if rank == 0:
         print(f"elpased time: {(time.time() - s) / float(epoch_num)} for {world_size} gpus for each epoch ")
     dist.barrier()

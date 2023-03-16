@@ -12,7 +12,7 @@
 ## Run
 
 ### DGL
- python dgl_distributed.py --world_size {} --epoch {} --dataset {} --batch_size {}
+ python run.py
 
 ### PyG 
- python pyg_distributed.py --world_size {} --epoch {} --dataset {} --batch_size {}
+ python run.py --backend pyg
